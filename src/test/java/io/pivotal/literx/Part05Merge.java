@@ -1,9 +1,10 @@
 package io.pivotal.literx;
 
+import org.junit.Test;
+
 import io.pivotal.literx.domain.User;
 import io.pivotal.literx.repository.ReactiveRepository;
 import io.pivotal.literx.repository.ReactiveUserRepository;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,7 +34,7 @@ public class Part05Merge {
 
 	// TODO Merge flux1 and flux2 values with interleave
 	Flux<User> mergeFluxWithInterleave(Flux<User> flux1, Flux<User> flux2) {
-		return null;
+		return Flux.merge(flux1, flux2);
 	}
 
 //========================================================================================
@@ -48,7 +49,7 @@ public class Part05Merge {
 
 	// TODO Merge flux1 and flux2 values with no interleave (flux1 values and then flux2 values)
 	Flux<User> mergeFluxWithNoInterleave(Flux<User> flux1, Flux<User> flux2) {
-		return null;
+		return Flux.concat(flux1, flux2);
 	}
 
 //========================================================================================
@@ -65,7 +66,7 @@ public class Part05Merge {
 
 	// TODO Create a Flux containing the value of mono1 then the value of mono2
 	Flux<User> createFluxFromMultipleMono(Mono<User> mono1, Mono<User> mono2) {
-		return null;
+		return Flux.concat(mono1, mono2);
 	}
 
 }

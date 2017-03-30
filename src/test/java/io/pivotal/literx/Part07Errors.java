@@ -18,8 +18,9 @@ package io.pivotal.literx;
 
 import java.util.function.Function;
 
-import io.pivotal.literx.domain.User;
 import org.junit.Test;
+
+import io.pivotal.literx.domain.User;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -52,7 +53,7 @@ public class Part07Errors {
 
 	// TODO Return a Mono<User> containing User.SAUL when an error occurs in the input Mono, else do not change the input Mono.
 	Mono<User> betterCallSaulForBogusMono(Mono<User> mono) {
-		return null;
+		return mono.otherwiseReturn(User.SAUL);
 	}
 
 //========================================================================================
@@ -72,7 +73,7 @@ public class Part07Errors {
 
 	// TODO Return a Flux<User> containing User.SAUL and User.JESSE when an error occurs in the input Flux, else do not change the input Flux.
 	Flux<User> betterCallSaulAndJesseForBogusFlux(Flux<User> flux) {
-		return null;
+		return flux.switchOnError(Flux.just(User.SAUL, User.JESSE));
 	}
 
 //========================================================================================
@@ -87,7 +88,13 @@ public class Part07Errors {
 
 	// TODO Implement a method that capitalize each user of the incoming flux using the capitalizeUser() method and emit an error containing a GetOutOfHereException exception
 	Flux<User> capitalizeMany(Flux<User> flux) {
-		return null;
+		return flux.map(u -> {
+		    try {
+		        return capitalizeUser(u);
+		    } catch (Exception e) {
+		        throw Exceptions.propagate(e);
+		    }
+		});
 	}
 
 	User capitalizeUser(User user) throws GetOutOfHereException {

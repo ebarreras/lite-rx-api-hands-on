@@ -1,16 +1,19 @@
 package io.pivotal.literx;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.util.Iterator;
+
+import org.junit.Test;
 
 import io.pivotal.literx.domain.User;
 import io.pivotal.literx.repository.BlockingRepository;
 import io.pivotal.literx.repository.BlockingUserRepository;
 import io.pivotal.literx.repository.ReactiveRepository;
 import io.pivotal.literx.repository.ReactiveUserRepository;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -45,8 +48,16 @@ public class Part11BlockingToReactive {
 
 	// TODO Create a Flux for reading all users from the blocking repository deferred until the flux is subscribed, and run it with an elastic scheduler
 	Flux<User> blockingRepositoryToFlux(BlockingRepository<User> repository) {
-		return null;
+		return Flux.create((FluxSink<User> sink) -> {
+		    repository.findAll().forEach(u -> sink.next(u));
+		    sink.complete();
+		}).publishOn(Schedulers.elastic());
 	}
+
+	// the 'natural' implementation -but I didn't know yet about defer
+    Flux<User> blockingRepositoryToFluxUsingDefer(BlockingRepository<User> repository) {
+        return Flux.defer(() -> Flux.fromIterable(repository.findAll())).publishOn(Schedulers.elastic());
+    }
 
 //========================================================================================
 
@@ -68,7 +79,7 @@ public class Part11BlockingToReactive {
 
 	// TODO Insert users contained in the Flux parameter in the blocking repository using an parallel scheduler and return a Mono<Void> that signal the end of the operation
 	Mono<Void> fluxToBlockingRepository(Flux<User> flux, BlockingRepository<User> repository) {
-		return null;
+		return flux.publishOn(Schedulers.parallel()).doOnNext(u -> repository.save(u)).then();
 	}
 
 }
